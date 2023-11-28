@@ -5,18 +5,27 @@ using UnityEngine;
 public class LivingEntity : MonoBehaviour, IDamageable
 {
     public float startingHealth;
-    protected float headth;
+    protected float health;
     protected bool dead;
+
+    public event System.Action OnDeath;
 
     protected virtual void Start()
     {
-        headth = startingHealth;
+        health = startingHealth;
+        Debug.Log(gameObject.name + ":" + health);
     }
 
     public void TakeHit(float damage, RaycastHit hit)
     {
-        headth -= damage;
-        if(headth <= 0 && !dead)
+        TakeDamage(damage);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        health -= damage;
+        Debug.Log(health);
+        if (health <= 0 && !dead)
         {
             Die();
         }
@@ -25,6 +34,10 @@ public class LivingEntity : MonoBehaviour, IDamageable
     protected void Die()
     {
         dead = true;
+        if(OnDeath != null)
+        {
+            OnDeath();
+        }
         GameObject.Destroy(gameObject);
     }
 }
