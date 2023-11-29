@@ -95,3 +95,33 @@
 
 8. 解决的问题：子弹因为穿模在游戏实体内部打出，此时射线无法检测到，那么会浪费一颗子弹。
    解决方法：在子弹生成时，检测半径为0.1f的一个球体范围内是否与Enemy层有重叠，有，则说明子弹打到敌人了。
+
+## Development Day 2: 2023.11.29
+
+1. 编写一个`Unity3D`的`Editor`，需要调用`using UnityEditor`，并且声明当前哪个脚本是`Editor`，在编辑器当中，当前这个脚本用`target`指代：
+
+   ```
+   using System.Collections;
+   using System.Collections.Generic;
+   using UnityEditor;
+   using UnityEngine;
+   
+   [CustomEditor(typeof(MyEditor))]
+   public class Editor : Editor
+   {
+   	/* 编辑器代码 */
+   }
+   ```
+
+2. 制作一个工具类：
+
+   ```
+   using System.Collections;
+   
+   public static class Utility
+   {
+   	/* 工具类代码 */
+   }
+   ```
+
+3. `obstacleMap.GetLength(0)`
