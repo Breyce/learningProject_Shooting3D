@@ -125,3 +125,38 @@
    ```
 
 3. `obstacleMap.GetLength(0)`
+
+
+
+## Development Day 3: 2023.12.2
+
+1. 内部类如果想要在UI上显示出来，需要给他添加`[System.Serializable]`，并且保证类中所有类型都是可显示的。如下所示，内部类中所有的`Coordinate`类型的参数都需要在`Coordinate`上添加`[System.Serializable]`才行，实现可序列化：
+
+   ```C#
+       [System.Serializable]
+       public struct Coordinate
+       {
+       	//...
+       }
+   
+       [System.Serializable]
+       public class Map
+       {
+           public Coordinate mapSize;
+           [Range(0,1)]
+           public float obstaclePercent;
+           public int seed;
+           
+           public Coordinate mapCenter
+           {
+               get
+               {
+                   return new Coordinate(mapSize.x/2, mapSize.y/2);
+               }
+           }
+       }
+   ```
+
+2. 使用`DrawDefaultInspector();`可以保证只有在编辑器当中的值更新时才会调用，从而避免了不断地调用这个值影响`Unity`的效率。
+
+3. 通过`[ContextMenu("Your Tip")]`可以再`Unity`的UI当中右键时添加一个选项，这个选项会触发其下绑定的函数。

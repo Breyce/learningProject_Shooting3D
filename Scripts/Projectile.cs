@@ -24,7 +24,7 @@ public class Projectile : MonoBehaviour
         Collider[] initialCollision = Physics.OverlapSphere(transform.position, .1f, collisionMask);
         if(initialCollision.Length > 0)
         {
-            OnHitObject(initialCollision[0]);
+            OnHitObject(initialCollision[0], transform.position);
         }
     }
 
@@ -48,25 +48,11 @@ public class Projectile : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, moveDistance + skinWidth, collisionMask, QueryTriggerInteraction.Collide))
         {
-            OnHitObject(hit);
+            OnHitObject(hit.collider,hit.point);
         }
     }
 
-    void OnHitObject(RaycastHit hit)
-    {
-        //print(hit.collider.gameObject.name);
-
-        //检查碰撞物体身上是否有实现Idamageable接口
-        IDamageable damageableObject = hit.collider.GetComponent<IDamageable>();
-        if (damageableObject != null) //如果有实现
-        {
-            damageableObject.TakeHit(damage, hit);
-        }
-
-        GameObject.Destroy(gameObject);
-    }
-
-    void OnHitObject(Collider c)
+    void OnHitObject(Collider c, Vector3 hitPoint)
     {
         //print(hit.collider.gameObject.name);
 
@@ -74,7 +60,7 @@ public class Projectile : MonoBehaviour
         IDamageable damageableObject = c.GetComponent<IDamageable>();
         if (damageableObject != null) //如果有实现
         {
-            damageableObject.TakeDamage(damage);
+            damageableObject.TakeHit(damage, hitPoint, transform.forward);
         }
 
         GameObject.Destroy(gameObject);

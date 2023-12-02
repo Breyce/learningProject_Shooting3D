@@ -13,6 +13,7 @@ public class Enemy : LivingEntity
         Attack
     }
     State currState;
+    public ParticleSystem deathEffect;
 
     NavMeshAgent pathFinder;
     Transform target;
@@ -54,6 +55,15 @@ public class Enemy : LivingEntity
             //开启携程，避免频繁调用更新路径的函数降低游戏效率
             StartCoroutine(UpdatePath());
         }
+    }
+
+    public override void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection)
+    {
+        if(damage >= health)
+        {
+            Destroy(Instantiate(deathEffect.gameObject, hitPoint, Quaternion.FromToRotation(Vector3.forward, hitDirection)) as GameObject, deathEffect.startLifetime);
+        }
+        base.TakeHit(damage, hitPoint, hitDirection);
     }
 
     void Update()
