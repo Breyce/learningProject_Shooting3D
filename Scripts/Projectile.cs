@@ -12,6 +12,7 @@ public class Projectile : MonoBehaviour
 
     //获取组件
     public LayerMask collisionMask;
+    public Color trailColor;
 
     private void Start()
     {
@@ -26,6 +27,8 @@ public class Projectile : MonoBehaviour
         {
             OnHitObject(initialCollision[0], transform.position);
         }
+
+        GetComponent<TrailRenderer>().material.SetColor("_TintColor",trailColor);
     }
 
     public void SetSpeed(float newSpeed)

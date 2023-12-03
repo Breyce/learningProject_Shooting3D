@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
+    public bool devMode;
+
     public Wave[] waves;
     public Enemy enemy;
 
@@ -54,12 +56,26 @@ public class Spawner : MonoBehaviour
 
                 campPositionOld = playerT.position;
             }
-            if(enemyRemainToSpawn > 0 && Time.time > nextSpawnTime)
+            if((enemyRemainToSpawn > 0 || currentWave.infinite) && Time.time > nextSpawnTime)
             {
                 enemyRemainToSpawn--;
                 nextSpawnTime = Time.time + currentWave.timeBetweenSpawns;
 
                 StartCoroutine(SpawnEnemy());
+            }
+
+            if (devMode)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    StopCoroutine(SpawnEnemy());
+
+                    foreach (Enemy enemy in FindObjectsOfType<Enemy>())
+                    {
+                        GameObject.Destroy(enemy.gameObject);
+                    }
+                    NextWave();
+                }
             }
         }
     }
@@ -90,6 +106,7 @@ public class Spawner : MonoBehaviour
 
         Enemy spawnEnemy = Instantiate(enemy, randomTile.position + Vector3.up, Quaternion.identity) as Enemy;
         spawnEnemy.OnDeath += OnEnemyDeath;
+        spawnEnemy.SetCharacteristic(currentWave.movSpeed, currentWave.hitTokillPlayer, currentWave.enemyHealth, currentWave.skinColor);
     }
 
     void OnPlayerDeath()
@@ -137,7 +154,13 @@ public class Spawner : MonoBehaviour
     [System.Serializable]
     public class Wave
     {
+        public bool infinite;
         public int enemyCount; //敌人总数
         public float timeBetweenSpawns; //每个敌人的时间间隔
+
+        public float movSpeed;
+        public int hitTokillPlayer;
+        public float enemyHealth;
+        public Color skinColor;
     }
 }

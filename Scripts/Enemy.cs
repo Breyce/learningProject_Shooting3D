@@ -31,27 +31,31 @@ public class Enemy : LivingEntity
 
     bool hasTarget;
 
-    protected override void Start()
+    private void Awake()
     {
-        base.Start();
-
         //获取组件
         pathFinder = GetComponent<NavMeshAgent>();
-        skinMaterial = GetComponent<Renderer>().material;
-        originColor = skinMaterial.color;
 
         if (GameObject.FindGameObjectWithTag("Player") != null)
         {
             target = GameObject.FindGameObjectWithTag("Player").transform;
             targetEntity = target.GetComponent<LivingEntity>();
-            targetEntity.OnDeath += OnTargetDeath;
 
             //参数赋默认值
             hasTarget = true;
-            currState = State.Chasing;
             myCollisionRadius = GetComponent<CapsuleCollider>().radius;
             targetCollisionRadius = target.GetComponent<CapsuleCollider>().radius;
+        }
+    }
+    protected override void Start()
+    {
+        base.Start();
 
+        if (hasTarget)
+        {
+            targetEntity.OnDeath += OnTargetDeath;
+            currState = State.Chasing;
+            
             //开启携程，避免频繁调用更新路径的函数降低游戏效率
             StartCoroutine(UpdatePath());
         }
@@ -143,5 +147,20 @@ public class Enemy : LivingEntity
             }
             yield return new WaitForSeconds(refreshRate);
         }
+    }
+
+    public void SetCharacteristic(float movSpeed,int hitTokillPlayer,float enemyHealth, Color skinColor)
+    {
+        pathFinder.speed = movSpeed;
+
+        if (hasTarget)
+        {
+            damage = Mathf.Ceil(targetEntity.startingHealth / hitTokillPlayer);
+        }
+
+        startingHealth = enemyHealth;
+        skinMaterial = GetComponent<Renderer>().material;
+        skinMaterial.color = skinColor;
+        originColor = skinMaterial.color;
     }
 }
