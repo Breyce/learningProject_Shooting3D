@@ -9,6 +9,8 @@ public class GameUI : MonoBehaviour
     public Image fadePlane;
     public GameObject gameOverUI;
     public GameObject pauseUI;
+    public int bulletLeft;
+    public float reloadTime;
 
     public RectTransform newWaveBanner;
     public RectTransform healthBar;
@@ -16,11 +18,14 @@ public class GameUI : MonoBehaviour
     public Text newWaveEnemyCount;
     public Text newWaveWeapon;
     public Text newWaveWeaponFireMode;
+    public Text currentBullet;
+    public Text countReload;
     public Text ScoreText;
     public Text GameOverScoreText;
 
 
     bool isPause;
+    bool showCursor;
     Spawner spawner;
     Player player;
     GunController gun;
@@ -37,6 +42,7 @@ public class GameUI : MonoBehaviour
     private void Start()
     {
         isPause = false;
+        showCursor = false;
         player = FindObjectOfType<Player>();
         player.OnDeath += GameOver;
     }
@@ -51,9 +57,15 @@ public class GameUI : MonoBehaviour
         } 
         healthBar.localScale = new Vector3(healthPercent, 1, 1);
 
+        currentBullet.text = "Bullet Left: " + bulletLeft;
+        if(reloadTime > 0) countReload.text = "Reloading..." + (int)reloadTime;
+        else countReload.text = "";
+
         if (Input.GetKeyDown(KeyCode.Escape)) { 
             
             isPause = !isPause;
+            showCursor = !showCursor;
+            Cursor.visible = showCursor;
             pauseUI.gameObject.SetActive(isPause);
 
         }

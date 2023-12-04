@@ -14,7 +14,7 @@ public class Gun : MonoBehaviour
     public Projectile projectile;
     public float msBetweenShoots = 1000;
     public float muzzleVelocity = 35;
-    public float reloadTime = 3f;
+    public float reloadTime = 2f;
 
     [Header("Reload Feature")]
     public int projectilesPerMag;
@@ -37,18 +37,22 @@ public class Gun : MonoBehaviour
     public AudioClip shootAudio;
     public AudioClip reloadSound;
 
+    bool isReloading;
     bool triggerReleaseSinceLastShoot;
     int shootRemainInBurst;
     int projectilesRemainInMag;
-    bool isReloading;
-
-    Vector3 recoilSmoothDampVelocity;
     float recoilAngleSmoothDampVelocity;
     float recoilAngle;
+    
+    
+    Vector3 recoilSmoothDampVelocity;
+    GameUI gameUI;
+
 
     private void Start()
     {
         muzzleFlash = GetComponent<MuzzleFlash>();
+        gameUI = FindObjectOfType<Canvas>().GetComponent<GameUI>();
         shootRemainInBurst = burstCount;
 
         //参数初始化
@@ -57,6 +61,7 @@ public class Gun : MonoBehaviour
         recoilMoveSettleTime = .1f;
         recoilRotationSettleTime = .1f;
         projectilesRemainInMag = projectilesPerMag;
+        gameUI.bulletLeft = projectilesPerMag;
     }
 
     private void LateUpdate()
@@ -73,16 +78,17 @@ public class Gun : MonoBehaviour
     }
     void Shoot()
     {
-        if( !isReloading && Time.time > nextShotTime && projectilesRemainInMag > 0)//射击间隔
+        if (!isReloading && Time.time > nextShotTime && projectilesRemainInMag > 0)//射击间隔
         {
-            if(fireMode == FireMode.Burst)
+            if (fireMode == FireMode.Burst)
             {
-                if(shootRemainInBurst == 0)
+                if (shootRemainInBurst == 0)
                 {
                     return;
                 }
                 shootRemainInBurst--;
-            }else if(fireMode == FireMode.Single)
+            }
+            else if (fireMode == FireMode.Single)
             {
                 if (!triggerReleaseSinceLastShoot)
                 {
@@ -91,13 +97,13 @@ public class Gun : MonoBehaviour
             }
             nextShotTime = Time.time + msBetweenShoots / 1000;
 
-            for(int i = 0;i<projectSpawn.Length;i++)
+            for (int i = 0; i < projectSpawn.Length; i++)
             {
                 if (projectilesRemainInMag == 0)
                 {
                     return;
                 }
-                projectilesRemainInMag--; 
+                projectilesRemainInMag--;
                 Projectile newProjectile = Instantiate(projectile, projectSpawn[i].position, projectSpawn[i].rotation) as Projectile;
                 newProjectile.SetSpeed(muzzleVelocity);
             }
@@ -110,9 +116,12 @@ public class Gun : MonoBehaviour
             recoilAngle = Mathf.Clamp(recoilAngle, 0, 30);
 
             AudioManager.instance.PlaySound(shootAudio, transform.position);
-        }
 
+            //子弹数量修改
+            gameUI.bulletLeft = projectilesRemainInMag;
+        }
     }
+            
     public void Reload()
     {
         if(!isReloading && projectilesRemainInMag != projectilesPerMag)
@@ -136,6 +145,10 @@ public class Gun : MonoBehaviour
         while (percent < 1)
         {
             percent += Time.deltaTime * reloadSpeed;
+
+            //显示换弹时间
+            gameUI.reloadTime = reloadTime - percent * reloadTime;
+
             float interpolatioon = (-Mathf.Pow(percent,2) + percent) * 4;
             float reloadAngle = Mathf.Lerp(0, maxReloadAngle, interpolatioon);
 
@@ -146,6 +159,9 @@ public class Gun : MonoBehaviour
 
         isReloading = false;
         projectilesRemainInMag = projectilesPerMag;
+
+        //子弹数量修改
+        gameUI.bulletLeft = projectilesRemainInMag;
     }
 
     public void OnTriggerHold()
