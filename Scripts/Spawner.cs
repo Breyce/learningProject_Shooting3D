@@ -137,6 +137,7 @@ public class Spawner : MonoBehaviour
         }
         currentWaveNumber++;
 
+        playerEntity.health = playerEntity.startingHealth;
         //print("Wave Number: " + currentWaveNumber);
 
         if(currentWaveNumber - 1 < waves.Length)

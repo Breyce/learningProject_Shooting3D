@@ -5,7 +5,7 @@ using UnityEngine;
 public class LivingEntity : MonoBehaviour, IDamageable
 {
     public float startingHealth;
-    public float health {get;protected set;}
+    public float health;
     protected bool dead;
 
     public event System.Action OnDeath;

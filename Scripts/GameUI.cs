@@ -24,11 +24,13 @@ public class GameUI : MonoBehaviour
     Spawner spawner;
     Player player;
     GunController gun;
+    ScoreKeeper scoreKeeper;
 
     private void Awake()
     {
         spawner = FindObjectOfType<Spawner>();
         gun = FindObjectOfType<Player>().GetComponent<GunController>();
+        scoreKeeper = FindObjectOfType<ScoreKeeper>().GetComponent<ScoreKeeper>();
         spawner.OnNewWave += OnNewWave;
     }
 
@@ -41,7 +43,7 @@ public class GameUI : MonoBehaviour
 
     private void Update()
     {
-        ScoreText.text ="Scores: " + ScoreKeeper.score.ToString("D6");
+        ScoreText.text ="Scores: " + scoreKeeper.score.ToString("D6");
         float healthPercent = 0;
         if (player != null)
         {
@@ -133,5 +135,12 @@ public class GameUI : MonoBehaviour
     public void BackToMenu()
     {
         SceneManager.LoadScene("Menu");
+        scoreKeeper.score = 0;
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene("Game");
+        scoreKeeper.score = 0;
     }
 }
