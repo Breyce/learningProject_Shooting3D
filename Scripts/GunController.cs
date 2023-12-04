@@ -5,31 +5,36 @@ using UnityEngine;
 public class GunController : MonoBehaviour
 {
     public Transform weaponHold;
-    public Gun startGun;
+    public Gun[] allGun;
     Gun equipGun;
 
     private void Start()
     {
-        if(startGun != null)
+        if (allGun != null)
         {
-            EquipGun(startGun);
+            EquipGun(1);
         }
     }
 
-    public void EquipGun(Gun gunToEquip)
+    void EquipGun(Gun gunToEquip)
     {
         if (equipGun != null)
         {
             Destroy(equipGun.gameObject);
         }
-        equipGun = Instantiate(gunToEquip,weaponHold.position,weaponHold.rotation) as Gun;
+        equipGun = Instantiate(gunToEquip, weaponHold.position, weaponHold.rotation) as Gun;
 
         equipGun.transform.parent = weaponHold;
     }
 
+    public void EquipGun(int weaponIndex)
+    {
+        EquipGun(allGun[weaponIndex]);
+    }
+
     public void OnTriggerHold()
     {
-        if(equipGun != null)
+        if (equipGun != null)
         {
             equipGun.OnTriggerHold();
         }
@@ -40,6 +45,28 @@ public class GunController : MonoBehaviour
         if (equipGun != null)
         {
             equipGun.OnTriggerRelease();
+        }
+    }
+
+    public float GunHeight
+    {
+        get {
+            return weaponHold.position.y;
+        }
+    }
+
+    public void Aim(Vector3 aimPoint){
+        if (equipGun != null)
+        {
+            equipGun.Aim(aimPoint);
+        }
+    }
+
+    public void Reload()
+    {
+        if (equipGun != null)
+        {
+            equipGun.Reload();
         }
     }
 }

@@ -1,0 +1,130 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class AudioManager : MonoBehaviour
+{
+    public static AudioManager instance;
+
+    public enum AudioChannel { Master, SFX, Music}
+    public AudioChannel channel;
+
+    public float masterVolumePercent { get; private set; }
+    public float sfxVolumePercent { get; private set; }
+    public float musicVolumePercent { get; private set; }
+
+    AudioSource sfx2DSource;
+    AudioSource[] musicSources;
+    int activeMusicSourceIndex;
+
+    Transform audioListener;
+    Transform playerT;
+
+    SoundLibrary library;
+
+    private void Awake()
+    {
+        if(instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+
+            musicSources = new AudioSource[2];
+            for (int i = 0; i < musicSources.Length; i++)
+            {
+                GameObject newMusicSource = new GameObject("Music source" + (i + 1));
+                musicSources[i] = newMusicSource.AddComponent<AudioSource>();
+                newMusicSource.transform.parent = transform;
+            }
+
+            GameObject newSfx2DSource = new GameObject("2D sfx source");
+            sfx2DSource = newSfx2DSource.AddComponent<AudioSource>();
+            newSfx2DSource.transform.parent = transform;
+
+            audioListener = FindObjectOfType<AudioListener>().transform;
+            if(FindObjectOfType<Player>() != null) playerT = FindObjectOfType<Player>().transform;
+            library = GetComponent<SoundLibrary>();
+
+            masterVolumePercent = PlayerPrefs.GetFloat("master Vol", .2f);
+            sfxVolumePercent = PlayerPrefs.GetFloat("sfx Vol", 1);
+            musicVolumePercent = PlayerPrefs.GetFloat("music Vol", .1f);
+        }
+
+    }
+
+    private void Update()
+    {
+        if(playerT != null)
+        {
+            audioListener.position = playerT.position;
+        }    
+    }
+
+    public void SetVolume(float volumePercent,AudioChannel channel)
+    {
+        switch(channel)
+        {
+            case AudioChannel.Master:
+                masterVolumePercent = volumePercent;
+                break;
+            case AudioChannel.SFX:
+                sfxVolumePercent = volumePercent;
+                break;
+            case AudioChannel.Music:
+                musicVolumePercent = volumePercent;
+                break;
+        }
+
+        musicSources[0].volume = musicVolumePercent * masterVolumePercent;
+        musicSources[1].volume = musicVolumePercent * masterVolumePercent;
+
+        PlayerPrefs.SetFloat("master Vol", masterVolumePercent);
+        PlayerPrefs.SetFloat("sfx Vol", sfxVolumePercent);
+        PlayerPrefs.SetFloat("music Vol", musicVolumePercent);
+        PlayerPrefs.Save();
+    }
+
+    public void PlayMusic(AudioClip clip, float fadeDuration = 1)
+    {
+        activeMusicSourceIndex = 1 - activeMusicSourceIndex;
+        musicSources[activeMusicSourceIndex].clip = clip;
+        musicSources[activeMusicSourceIndex].Play();
+
+        StartCoroutine(AnimateMusicCrossfade(fadeDuration));
+    }
+
+    public void PlaySound(AudioClip clip, Vector3 pos)
+    {
+        if(clip != null)
+        {
+            AudioSource.PlayClipAtPoint(clip, pos, sfxVolumePercent * masterVolumePercent); //更加适合播放音乐
+        }
+    }
+
+    public void PlaySound(string soundName, Vector3 pos)
+    {
+        PlaySound(library.GetClipFromName(soundName), pos);
+    }
+
+    public void PlaySound2D(string soundName)
+    {
+        sfx2DSource.PlayOneShot(library.GetClipFromName(soundName), sfxVolumePercent * masterVolumePercent * .2f);
+    }
+
+    IEnumerator AnimateMusicCrossfade(float duration)
+    {
+        float percent = 0;
+
+        while(percent < 1)
+        {
+            percent += Time.deltaTime * 1 / duration;
+            musicSources[activeMusicSourceIndex].volume = Mathf.Lerp(0, musicVolumePercent * masterVolumePercent, percent);
+            musicSources[1 - activeMusicSourceIndex].volume = Mathf.Lerp(musicVolumePercent * masterVolumePercent, 0, percent);
+            yield return null;
+        }
+    }
+}

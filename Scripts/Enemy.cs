@@ -14,6 +14,7 @@ public class Enemy : LivingEntity
     }
     State currState;
     public ParticleSystem deathEffect;
+    public static event System.Action OnDeathStatic;
 
     NavMeshAgent pathFinder;
     Transform target;
@@ -63,8 +64,14 @@ public class Enemy : LivingEntity
 
     public override void TakeHit(float damage, Vector3 hitPoint, Vector3 hitDirection)
     {
+        AudioManager.instance.PlaySound("Impact",transform.position);
         if(damage >= health)
         {
+            if(OnDeathStatic != null)
+            {
+                OnDeathStatic();
+            }
+            AudioManager.instance.PlaySound("EnemyDeath", transform.position);
             Destroy(Instantiate(deathEffect.gameObject, hitPoint, Quaternion.FromToRotation(Vector3.forward, hitDirection)) as GameObject, deathEffect.startLifetime);
         }
         base.TakeHit(damage, hitPoint, hitDirection);
@@ -81,6 +88,8 @@ public class Enemy : LivingEntity
                 if(sqrDstToTarget < Mathf.Pow(attackDistanceThreshold + myCollisionRadius + targetCollisionRadius, 2))
                 {
                     nextAttackTime = Time.time + timeBetweenAttacks;
+                    AudioManager.instance.PlaySound("EnemyAttack", transform.position);
+
                     StartCoroutine(Attack());
                 }
             }
@@ -149,6 +158,7 @@ public class Enemy : LivingEntity
         }
     }
 
+    [System.Obsolete]
     public void SetCharacteristic(float movSpeed,int hitTokillPlayer,float enemyHealth, Color skinColor)
     {
         pathFinder.speed = movSpeed;
@@ -158,6 +168,7 @@ public class Enemy : LivingEntity
             damage = Mathf.Ceil(targetEntity.startingHealth / hitTokillPlayer);
         }
 
+        deathEffect.startColor = new Color(skinColor.r, skinColor.g, skinColor.b, 1);
         startingHealth = enemyHealth;
         skinMaterial = GetComponent<Renderer>().material;
         skinMaterial.color = skinColor;

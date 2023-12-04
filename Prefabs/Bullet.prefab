@@ -113,7 +113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 288
+    m_Bits: 1312
   trailColor: {r: 1, g: 0.88523597, b: 0.38113207, a: 0.8039216}
 --- !u!96 &1311993310
 TrailRenderer:

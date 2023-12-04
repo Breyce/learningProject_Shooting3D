@@ -5,7 +5,7 @@ using UnityEngine;
 public class LivingEntity : MonoBehaviour, IDamageable
 {
     public float startingHealth;
-    protected float health;
+    public float health {get;protected set;}
     protected bool dead;
 
     public event System.Action OnDeath;
@@ -32,7 +32,7 @@ public class LivingEntity : MonoBehaviour, IDamageable
     }
 
     [ContextMenu("Self Destruct")]
-    protected void Die()
+    public virtual void Die()
     {
         dead = true;
         if(OnDeath != null)
